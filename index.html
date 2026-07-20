@@ -422,7 +422,7 @@
       renderQuestion();
     } catch (err) {
       startError.textContent = "Couldn't load quiz: " + err.message +
-        ". Make sure your Spring Boot server is running on localhost:8080 and CORS is enabled.";
+        ". Make sure your Spring Boot server is running and CORS is enabled.";
       startError.classList.remove('hidden');
     } finally {
       startBtn.disabled = false;
@@ -512,7 +512,8 @@
       showResult(result);
     } catch (err) {
       alert("Couldn't submit quiz: " + err.message);
-      nextBtn.disabled = !answers[q.id];
+      const currentQuestion = questions[currentIndex];
+      nextBtn.disabled = !answers[currentQuestion.id];
       nextBtn.textContent = "Submit";
     }
   }
