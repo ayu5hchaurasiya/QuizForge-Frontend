@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizApp</title>
+<style>
+  :root {
+    --ink: #1b1f24;
+    --paper: #fdfaf3;
+    --panel: #ffffff;
+    --accent: #5b5bd6;
+    --accent-dark: #4444b0;
+    --correct: #1e8a5f;
+    --wrong: #c2452f;
+    --muted: #6b7280;
+    --border: #e4e0d4;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    position: relative;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background:
+      linear-gradient(rgba(253,250,243,0.92), rgba(253,250,243,0.92)),
+      url('https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1400&q=80');
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  @media (max-width: 768px) {
+    .app { max-width: 100%; }
+    .nav-row { flex-direction: column; gap: 10px; }
+    button { width: 100%; }
+    header { flex-direction: column; gap: 8px; }
+  }
+
+  .app {
+    width: 100%;
+    max-width: 620px;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: 12px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  header .tag {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .start-card { text-align: center; }
+
+  .start-card p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  button {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  button:hover { background: var(--accent-dark); }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  input[type="text"] {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .progress {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .q-number {
+    font-family: 'Courier New', monospace;
+    font-size: 42px;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .q-text {
+    font-size: 20px;
+    line-height: 1.4;
+    margin: 6px 0 22px 0;
+  }
+
+  .q-meta {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    background: var(--paper);
+    transition: border-color 0.12s ease, background 0.12s ease;
+    font-size: 15px;
+  }
+
+  .option:hover { border-color: var(--accent); }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: #ecebfb;
+  }
+
+  .option .letter {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .option.selected .letter {
+    background: var(--accent);
+    color: white;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+
+  .status-line {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+
+  .error-box {
+    border: 1px solid var(--wrong);
+    color: var(--wrong);
+    background: #fbeae6;
+    padding: 12px 16px;
+    border-radius: 3px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .success-box {
+    border: 1px solid var(--correct);
+    color: var(--correct);
+    background: #e7f5ee;
+    padding: 12px 16px;
+    border-radius: 3px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .hidden { display: none !important; }
+
+  .result-score { text-align: center; padding: 20px 0; }
+
+  .result-score .big {
+    font-size: 64px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .result-score .label {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .result-detail {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    text-align: center;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card h2 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  .cat-question {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .cat-meta {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  footer {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 30px;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>QuizApp</h1>
+    <span class="tag">5 Questions</span>
+  </header>
+
+  <!-- START SCREEN -->
+  <div class="card start-card" id="startScreen">
+    <p>Hit start to pull five random questions from your quiz-app server and test yourself.</p>
+    <div class="error-box hidden" id="startError"></div>
+    <button id="startBtn">Start Quiz</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="card hidden" id="quizScreen">
+    <div class="progress" id="progressLabel">Question 1 of 5</div>
+    <div class="q-number" id="qNumber">01</div>
+    <span class="q-meta" id="qDifficulty">EASY</span>
+    <div class="q-text" id="qText">Loading question...</div>
+    <div class="options" id="optionsList"></div>
+    <div class="nav-row">
+      <button id="prevBtn" disabled>Back</button>
+      <button id="nextBtn" disabled>Next</button>
+    </div>
+    <div class="status-line" id="answeredCount">0 of 5 answered</div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="card hidden" id="resultScreen">
+    <div class="result-score">
+      <div class="big" id="scoreBig">0%</div>
+      <div class="label">Your Score</div>
+      <div class="result-detail" id="scoreDetail">0 of 5 correct</div>
+    </div>
+    <div class="nav-row" style="justify-content: center;">
+      <button id="retryBtn">Try Again</button>
+    </div>
+  </div>
+
+  <!-- EXTRA OPTIONS: only shown after result -->
+  <div id="extraOptions" class="hidden">
+
+    <div class="card" style="text-align:center;">
+      <p style="margin:0 0 14px 0; color:var(--muted);">Want to try more?</p>
+      <button id="showAddBtn">Add a Question</button>
+      <button id="showCategoryBtn" style="margin-left:10px;">Browse by Category</button>
+    </div>
+
+    <!-- ADD QUESTION CARD -->
+    <div class="card hidden" id="addScreen">
+      <h2>Add a New Question</h2>
+      <div class="error-box hidden" id="addError"></div>
+      <div class="success-box hidden" id="addSuccess"></div>
+
+      <div class="form-stack">
+        <input type="text" id="addQuestionText" placeholder="Question text">
+        <input type="text" id="addOptionA" placeholder="Option A">
+        <input type="text" id="addOptionB" placeholder="Option B">
+        <input type="text" id="addOptionC" placeholder="Option C">
+        <input type="text" id="addOptionD" placeholder="Option D">
+        <input type="text" id="addCorrectAnswer" placeholder="Correct Answer (A/B/C/D)">
+        <input type="text" id="addCategory" placeholder="Category (e.g. Java)">
+        <input type="text" id="addDifficulty" placeholder="Difficulty (Easy/Medium/Hard)">
+        <button id="addSubmitBtn">Add Question</button>
+      </div>
+    </div>
+
+    <!-- CATEGORY BROWSE CARD -->
+    <div class="card hidden" id="categoryScreen">
+      <h2>Browse Questions by Category</h2>
+      <div style="display:flex; gap:10px; margin-bottom:16px;">
+        <input type="text" id="categoryInput" placeholder="e.g. Java, Database">
+        <button id="categorySearchBtn">Search</button>
+      </div>
+      <div class="error-box hidden" id="categoryError"></div>
+      <div id="categoryResults"></div>
+    </div>
+
+  </div>
+
+  <footer>connects to localhost:8080/question</footer>
+</div>
+
+<script>
+  const API_BASE = "http://localhost:8080/question";
+
+  // ---------- Main quiz elements ----------
+  const startScreen = document.getElementById('startScreen');
+  const quizScreen = document.getElementById('quizScreen');
+  const resultScreen = document.getElementById('resultScreen');
+  const startBtn = document.getElementById('startBtn');
+  const startError = document.getElementById('startError');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const retryBtn = document.getElementById('retryBtn');
+
+  let questions = [];   // holds QuizDTO list from server
+  let currentIndex = 0;
+  let answers = {};     // { questionId: "A" }
+
+  startBtn.addEventListener('click', loadQuiz);
+  retryBtn.addEventListener('click', resetToStart);
+  prevBtn.addEventListener('click', () => navigate(-1));
+  nextBtn.addEventListener('click', () => navigate(1));
+
+  async function loadQuiz() {
+    startError.classList.add('hidden');
+    startBtn.disabled = true;
+    startBtn.textContent = "Loading...";
+
+    try {
+      const res = await fetch(`${API_BASE}/generate-quiz`);
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("No questions returned from server.");
+      }
+
+      questions = data;
+      answers = {};
+      currentIndex = 0;
+
+      startScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      renderQuestion();
+    } catch (err) {
+      startError.textContent = "Couldn't load quiz: " + err.message +
+        ". Make sure your Spring Boot server is running on localhost:8080 and CORS is enabled.";
+      startError.classList.remove('hidden');
+    } finally {
+      startBtn.disabled = false;
+      startBtn.textContent = "Start Quiz";
+    }
+  }
+
+  function renderQuestion() {
+    const q = questions[currentIndex];
+
+    document.getElementById('progressLabel').textContent =
+      `Question ${currentIndex + 1} of ${questions.length}`;
+    document.getElementById('qNumber').textContent =
+      String(currentIndex + 1).padStart(2, '0');
+    document.getElementById('qDifficulty').textContent =
+      (q.difficultyLevel || "N/A").toUpperCase();
+    document.getElementById('qText').textContent = q.questionText;
+
+    const options = [
+      { letter: 'A', text: q.optionA },
+      { letter: 'B', text: q.optionB },
+      { letter: 'C', text: q.optionC },
+      { letter: 'D', text: q.optionD },
+    ];
+
+    const list = document.getElementById('optionsList');
+    list.innerHTML = '';
+
+    options.forEach(opt => {
+      const div = document.createElement('div');
+      const isSelected = answers[q.id] === opt.letter;
+      div.className = 'option' + (isSelected ? ' selected' : '');
+      div.innerHTML = `<span class="letter">${opt.letter}</span><span>${opt.text}</span>`;
+      div.addEventListener('click', () => selectOption(q.id, opt.letter));
+      list.appendChild(div);
+    });
+
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.textContent = currentIndex === questions.length - 1 ? "Submit" : "Next";
+    nextBtn.disabled = !answers[q.id];
+
+    updateAnsweredCount();
+  }
+
+  function selectOption(questionId, letter) {
+    answers[questionId] = letter;
+    renderQuestion();
+  }
+
+  function updateAnsweredCount() {
+    const answeredNum = Object.keys(answers).length;
+    document.getElementById('answeredCount').textContent =
+      `${answeredNum} of ${questions.length} answered`;
+  }
+
+  function navigate(direction) {
+    const isLast = currentIndex === questions.length - 1;
+
+    if (direction === 1 && isLast) {
+      submitQuiz();
+      return;
+    }
+
+    currentIndex += direction;
+    renderQuestion();
+  }
+
+  async function submitQuiz() {
+    nextBtn.disabled = true;
+    nextBtn.textContent = "Submitting...";
+
+    const payload = questions.map(q => ({
+      questionId: q.id,
+      selectedOption: answers[q.id] || ""
+    }));
+
+    try {
+      const res = await fetch(`${API_BASE}/submit-quiz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const result = await res.json();
+
+      showResult(result);
+    } catch (err) {
+      alert("Couldn't submit quiz: " + err.message);
+      nextBtn.disabled = !answers[q.id];
+      nextBtn.textContent = "Submit";
+    }
+  }
+
+  function showResult(result) {
+    quizScreen.classList.add('hidden');
+    resultScreen.classList.remove('hidden');
+    document.getElementById('extraOptions').classList.remove('hidden');
+
+    document.getElementById('scoreBig').textContent = `${result.score}%`;
+    document.getElementById('scoreDetail').textContent =
+      `${result.correctAnswers} of ${result.totalQuestions} correct`;
+  }
+
+  function resetToStart() {
+    resultScreen.classList.add('hidden');
+    document.getElementById('extraOptions').classList.add('hidden');
+    document.getElementById('addScreen').classList.add('hidden');
+    document.getElementById('categoryScreen').classList.add('hidden');
+    startScreen.classList.remove('hidden');
+    questions = [];
+    answers = {};
+    currentIndex = 0;
+  }
+
+  // ---------- Toggle buttons for extra options ----------
+  document.getElementById('showAddBtn').addEventListener('click', () => {
+    document.getElementById('categoryScreen').classList.add('hidden');
+    document.getElementById('addScreen').classList.toggle('hidden');
+  });
+
+  document.getElementById('showCategoryBtn').addEventListener('click', () => {
+    document.getElementById('addScreen').classList.add('hidden');
+    document.getElementById('categoryScreen').classList.toggle('hidden');
+  });
+
+  // ---------- Add Question ----------
+  document.getElementById('addSubmitBtn').addEventListener('click', async () => {
+    const addError = document.getElementById('addError');
+    const addSuccess = document.getElementById('addSuccess');
+    addError.classList.add('hidden');
+    addSuccess.classList.add('hidden');
+
+    const newQuestion = {
+      questionText: document.getElementById('addQuestionText').value,
+      optionA: document.getElementById('addOptionA').value,
+      optionB: document.getElementById('addOptionB').value,
+      optionC: document.getElementById('addOptionC').value,
+      optionD: document.getElementById('addOptionD').value,
+      correctAnswer: document.getElementById('addCorrectAnswer').value,
+      category: document.getElementById('addCategory').value,
+      difficultyLevel: document.getElementById('addDifficulty').value
+    };
+
+    if (!newQuestion.questionText || !newQuestion.optionA || !newQuestion.correctAnswer) {
+      addError.textContent = "Please fill in at least the question, options, and correct answer.";
+      addError.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newQuestion)
+      });
+
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const message = await res.text();
+
+      addSuccess.textContent = message;
+      addSuccess.classList.remove('hidden');
+
+      ['addQuestionText','addOptionA','addOptionB','addOptionC','addOptionD','addCorrectAnswer','addCategory','addDifficulty']
+        .forEach(id => document.getElementById(id).value = '');
+
+    } catch (err) {
+      addError.textContent = "Couldn't add question: " + err.message;
+      addError.classList.remove('hidden');
+    }
+  });
+
+  // ---------- Browse by Category (answers hidden, scored locally on submit) ----------
+  let categoryQuestions = [];
+  let categoryAnswers = {};
+
+  document.getElementById('categorySearchBtn').addEventListener('click', async () => {
+    const category = document.getElementById('categoryInput').value.trim();
+    const categoryError = document.getElementById('categoryError');
+    const categoryResults = document.getElementById('categoryResults');
+    categoryError.classList.add('hidden');
+    categoryResults.innerHTML = '';
+    categoryAnswers = {};
+
+    if (!category) {
+      categoryError.textContent = "Type a category first.";
+      categoryError.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/category/${encodeURIComponent(category)}`);
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        categoryError.textContent = `No questions found for "${category}".`;
+        categoryError.classList.remove('hidden');
+        return;
+      }
+
+      categoryQuestions = data;
+      renderCategoryQuestions();
+
+    } catch (err) {
+      categoryError.textContent = "Couldn't load: " + err.message;
+      categoryError.classList.remove('hidden');
+    }
+  });
+
+  function renderCategoryQuestions() {
+    const categoryResults = document.getElementById('categoryResults');
+    categoryResults.innerHTML = '';
+
+    categoryQuestions.forEach((q, i) => {
+      const div = document.createElement('div');
+      div.className = 'cat-question';
+
+      const opts = [
+        { letter: 'A', text: q.optionA },
+        { letter: 'B', text: q.optionB },
+        { letter: 'C', text: q.optionC },
+        { letter: 'D', text: q.optionD },
+      ];
+
+      div.innerHTML = `
+        <div class="cat-meta">#${i + 1} — ${(q.difficultyLevel || 'N/A').toUpperCase()}</div>
+        <div style="margin-bottom:10px;">${q.questionText}</div>
+        <div class="cat-options" style="display:flex; flex-direction:column; gap:6px;"></div>
+      `;
+
+      const optWrap = div.querySelector('.cat-options');
+      opts.forEach(opt => {
+        const optDiv = document.createElement('div');
+        optDiv.className = 'option';
+        optDiv.style.padding = '10px 14px';
+        optDiv.innerHTML = `<span class="letter">${opt.letter}</span><span>${opt.text}</span>`;
+        optDiv.addEventListener('click', () => {
+          categoryAnswers[q.id] = opt.letter;
+          optWrap.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+          optDiv.classList.add('selected');
+        });
+        optWrap.appendChild(optDiv);
+      });
+
+      categoryResults.appendChild(div);
+    });
+
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit';
+    submitBtn.style.marginTop = '10px';
+    submitBtn.addEventListener('click', evaluateCategoryQuiz);
+    categoryResults.appendChild(submitBtn);
+  }
+
+  function evaluateCategoryQuiz() {
+    if (Object.keys(categoryAnswers).length !== categoryQuestions.length) {
+      alert('Please answer all questions before submitting.');
+      return;
+    }
+    let correct = 0;
+    categoryQuestions.forEach(q => {
+      if ((categoryAnswers[q.id] || '').toUpperCase() === (q.correctAnswer || '').toUpperCase()) {
+        correct++;
+      }
+    });
+
+    const total = categoryQuestions.length;
+    const score = total === 0 ? 0 : Math.round((correct / total) * 100);
+
+    document.getElementById('categoryResults').innerHTML = `
+      <div class="result-score">
+        <div class="big">${score}%</div>
+        <div class="label">Category Score</div>
+        <div class="result-detail">${correct} of ${total} correct</div>
+      </div>
+    `;
+  }
+</script>
+
+</body>
+</html>
