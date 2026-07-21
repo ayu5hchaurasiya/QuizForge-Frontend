@@ -36,13 +36,6 @@
     background-attachment: fixed;
   }
 
-  @media (max-width: 768px) {
-    .app { max-width: 100%; }
-    .nav-row { flex-direction: column; gap: 10px; }
-    button { width: 100%; }
-    header { flex-direction: column; gap: 8px; }
-  }
-
   .app {
     width: 100%;
     max-width: 620px;
@@ -197,10 +190,58 @@
     color: white;
   }
 
+  /* --- RESPONSIVE BUTTON & INPUT CONTAINERS (FIXED OVERLAP ISSUE) --- */
+  .action-buttons,
   .nav-row {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Stack vertically on narrow mobile devices */
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
     margin-top: 24px;
+  }
+
+  .search-box-row {
+    display: flex;
+    flex-direction: column; /* Stack input and search button vertically on mobile */
+    gap: 10px;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .action-buttons button,
+  .nav-row button,
+  .search-box-row button {
+    width: 100%; /* Stretch buttons to full width on mobile */
+  }
+
+  /* Tablet and Desktop View (min-width: 500px) */
+  @media (min-width: 500px) {
+    .action-buttons,
+    .nav-row,
+    .search-box-row {
+      flex-direction: row; /* Align side-by-side on larger screens */
+    }
+
+    .action-buttons button,
+    .nav-row button {
+      width: auto; /* Reset to natural width */
+    }
+
+    .search-box-row input {
+      flex: 1; /* Input expands to fill remaining space */
+    }
+
+    .search-box-row button {
+      width: auto;
+    }
+  }
+
+  /* General Mobile Screen Layout Tweaks */
+  @media (max-width: 768px) {
+    body { padding: 20px 12px; }
+    .app { max-width: 100%; }
+    header { flex-direction: column; gap: 8px; }
   }
 
   .status-line {
@@ -281,15 +322,6 @@
     color: var(--muted);
     margin-bottom: 6px;
   }
-
-  /* footer {
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 30px;
-    letter-spacing: 0.5px;
-  } */
 </style>
 </head>
 <body>
@@ -334,13 +366,13 @@
   </div>
 
   <!-- EXTRA OPTIONS: only shown after result -->
-  <div id="extraOptions" class="hidden">
-
-    <div class="card" style="text-align:center;">
-      <p style="margin:0 0 14px 0; color:var(--muted);">Want to try more?</p>
-      <button id="showAddBtn">Add a Question</button>
-      <button id="showCategoryBtn" style="margin-left:10px;">Browse by Category</button>
-    </div>
+  <div class="card" style="text-align:center;">
+  <p style="margin:0 0 14px 0; color:var(--muted);">Want to try more?</p>
+  <div class="action-buttons">
+    <button id="showAddBtn">Add a Question</button>
+    <button id="showCategoryBtn">Browse by Category</button>
+  </div>
+</div>
 
     <!-- ADD QUESTION CARD -->
     <div class="card hidden" id="addScreen">
@@ -364,9 +396,9 @@
     <!-- CATEGORY BROWSE CARD -->
     <div class="card hidden" id="categoryScreen">
       <h2>Browse Questions by Category</h2>
-      <div style="display:flex; gap:10px; margin-bottom:16px;">
-        <input type="text" id="categoryInput" placeholder="e.g. Java, Database">
-        <button id="categorySearchBtn">Search</button>
+      <div class="search-box-row">
+  <input type="text" id="categoryInput" placeholder="e.g. Java, Database">
+  <button id="categorySearchBtn">Search</button>
       </div>
       <div class="error-box hidden" id="categoryError"></div>
       <div id="categoryResults"></div>
