@@ -322,6 +322,25 @@
     color: var(--muted);
     margin-bottom: 6px;
   }
+  .timer-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.timer-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+.timer-text {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+  margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
@@ -348,6 +367,8 @@
     <span class="q-meta" id="qDifficulty">EASY</span>
     <div class="q-text" id="qText">Loading question...</div>
     <div class="options" id="optionsList"></div>
+    <div class="timer-text" id="timerText">15s</div>
+<div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%;"></div></div>
     <div class="nav-row">
       <button id="prevBtn" disabled>Back</button>
       <button id="nextBtn" disabled>Next</button>
@@ -432,6 +453,41 @@
   retryBtn.addEventListener('click', resetToStart);
   prevBtn.addEventListener('click', () => navigate(-1));
   nextBtn.addEventListener('click', () => navigate(1));
+
+
+  const QUESTION_TIME = 15; // seconds per question
+let timerInterval = null;
+let timeLeft = QUESTION_TIME;
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = QUESTION_TIME;
+  updateTimerUI();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      autoAdvance();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  document.getElementById('timerText').textContent = `${timeLeft}s`;
+  document.getElementById('timerFill').style.width = `${(timeLeft / QUESTION_TIME) * 100}%`;
+}
+
+function autoAdvance() {
+  const isLast = currentIndex === questions.length - 1;
+  if (isLast) {
+    submitQuiz();
+  } else {
+    currentIndex++;
+    renderQuestion();
+  }
+}
 
   async function loadQuiz() {
     startError.classList.add('hidden');
