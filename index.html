@@ -43,15 +43,18 @@
 
   header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     margin-bottom: 28px;
     border-bottom: 3px solid var(--ink);
-    padding-bottom: 12px;
+    padding-bottom: 16px;
+    text-align: center;
   }
 
-  header h1 {
-    font-size: 28px;
+ header h1 {
+    font-size: 32px;
     letter-spacing: 0.5px;
     margin: 0;
   }
@@ -63,7 +66,6 @@
     text-transform: uppercase;
     letter-spacing: 1.5px;
   }
-
   .card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -326,7 +328,7 @@
 
 <div class="app">
   <header>
-    <h1>QuizApp</h1>
+    <h1>QuizForge</h1>
     <span class="tag">5 Questions</span>
   </header>
 
