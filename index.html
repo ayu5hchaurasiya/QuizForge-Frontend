@@ -190,11 +190,11 @@
     color: white;
   }
 
-  /* --- RESPONSIVE BUTTON & INPUT CONTAINERS (FIXED OVERLAP ISSUE) --- */
+  /* --- RESPONSIVE BUTTON & INPUT CONTAINERS --- */
   .action-buttons,
   .nav-row {
     display: flex;
-    flex-direction: column; /* Stack vertically on narrow mobile devices */
+    flex-direction: column;
     gap: 12px;
     width: 100%;
     justify-content: center;
@@ -203,7 +203,7 @@
 
   .search-box-row {
     display: flex;
-    flex-direction: column; /* Stack input and search button vertically on mobile */
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 16px;
     width: 100%;
@@ -212,24 +212,23 @@
   .action-buttons button,
   .nav-row button,
   .search-box-row button {
-    width: 100%; /* Stretch buttons to full width on mobile */
+    width: 100%;
   }
 
-  /* Tablet and Desktop View (min-width: 500px) */
   @media (min-width: 500px) {
     .action-buttons,
     .nav-row,
     .search-box-row {
-      flex-direction: row; /* Align side-by-side on larger screens */
+      flex-direction: row;
     }
 
     .action-buttons button,
     .nav-row button {
-      width: auto; /* Reset to natural width */
+      width: auto;
     }
 
     .search-box-row input {
-      flex: 1; /* Input expands to fill remaining space */
+      flex: 1;
     }
 
     .search-box-row button {
@@ -237,7 +236,6 @@
     }
   }
 
-  /* General Mobile Screen Layout Tweaks */
   @media (max-width: 768px) {
     body { padding: 20px 12px; }
     .app { max-width: 100%; }
@@ -365,14 +363,15 @@
     </div>
   </div>
 
-  <!-- EXTRA OPTIONS: only shown after result -->
-  <div class="card" style="text-align:center;">
-  <p style="margin:0 0 14px 0; color:var(--muted);">Want to try more?</p>
-  <div class="action-buttons">
-    <button id="showAddBtn">Add a Question</button>
-    <button id="showCategoryBtn">Browse by Category</button>
-  </div>
-</div>
+  <!-- EXTRA OPTIONS: HIDDEN BY DEFAULT (Shown only after score) -->
+  <div id="extraOptions" class="hidden">
+    <div class="card" style="text-align:center;">
+      <p style="margin:0 0 14px 0; color:var(--muted);">Want to try more?</p>
+      <div class="action-buttons">
+        <button id="showAddBtn">Add a Question</button>
+        <button id="showCategoryBtn">Browse by Category</button>
+      </div>
+    </div>
 
     <!-- ADD QUESTION CARD -->
     <div class="card hidden" id="addScreen">
@@ -397,16 +396,14 @@
     <div class="card hidden" id="categoryScreen">
       <h2>Browse Questions by Category</h2>
       <div class="search-box-row">
-  <input type="text" id="categoryInput" placeholder="e.g. Java, Database">
-  <button id="categorySearchBtn">Search</button>
+        <input type="text" id="categoryInput" placeholder="e.g. Java, Database">
+        <button id="categorySearchBtn">Search</button>
       </div>
       <div class="error-box hidden" id="categoryError"></div>
       <div id="categoryResults"></div>
     </div>
-
   </div>
 
-  <!-- <footer>connects to localhost:8080/question</footer> -->
 </div>
 
 <script>
@@ -416,6 +413,7 @@
   const startScreen = document.getElementById('startScreen');
   const quizScreen = document.getElementById('quizScreen');
   const resultScreen = document.getElementById('resultScreen');
+  const extraOptions = document.getElementById('extraOptions');
   const startBtn = document.getElementById('startBtn');
   const startError = document.getElementById('startError');
   const prevBtn = document.getElementById('prevBtn');
@@ -553,7 +551,7 @@
   function showResult(result) {
     quizScreen.classList.add('hidden');
     resultScreen.classList.remove('hidden');
-    document.getElementById('extraOptions').classList.remove('hidden');
+    extraOptions.classList.remove('hidden'); // Show extra options only after result
 
     document.getElementById('scoreBig').textContent = `${result.score}%`;
     document.getElementById('scoreDetail').textContent =
@@ -562,7 +560,7 @@
 
   function resetToStart() {
     resultScreen.classList.add('hidden');
-    document.getElementById('extraOptions').classList.add('hidden');
+    extraOptions.classList.add('hidden');
     document.getElementById('addScreen').classList.add('hidden');
     document.getElementById('categoryScreen').classList.add('hidden');
     startScreen.classList.remove('hidden');
@@ -628,7 +626,7 @@
     }
   });
 
-  // ---------- Browse by Category (answers hidden, scored locally on submit) ----------
+  // ---------- Browse by Category ----------
   let categoryQuestions = [];
   let categoryAnswers = {};
 
